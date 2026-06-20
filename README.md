@@ -55,8 +55,9 @@ main.py            — entry point
 core/
   crypto.py        — Argon2id, AES-256-GCM, X25519, Ed25519, Shannon entropy ✅
   test_crypto.py   — 24 crypto primitive tests ✅
-  vault.py         — append-only versioned store
-  license.py       — Pro gate (require_pro / CanaryLockedError)
+  vault.py         — append-only versioned store, free-tier 50-entry cap ✅
+  test_vault.py    — 17 vault tests (create/unlock/add/list/restore/limit) ✅
+  license.py       — Pro gate stub (require_pro / check_vault_limit / CanaryLockedError) ✅
 guard/
   detector.py      — 🐤 canary detection engine (Pro)
 sync/
