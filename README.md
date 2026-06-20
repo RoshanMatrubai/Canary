@@ -53,7 +53,8 @@ Dashboard: http://localhost:5000
 config.py          — all config incl. CANARY_PRO toggle
 main.py            — entry point
 core/
-  crypto.py        — Argon2id, AES-256-GCM, X25519, Ed25519
+  crypto.py        — Argon2id, AES-256-GCM, X25519, Ed25519, Shannon entropy ✅
+  test_crypto.py   — 24 crypto primitive tests ✅
   vault.py         — append-only versioned store
   license.py       — Pro gate (require_pro / CanaryLockedError)
 guard/
