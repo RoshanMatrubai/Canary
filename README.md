@@ -68,7 +68,8 @@ dashboard/
   app.py           — Flask + SocketIO API + SocketIO server ✅
   templates/
     index.html     — single-page dashboard UI ✅
-simulate_ransomware.py  — # MOCK attack simulator
+simulate_ransomware.py  — # MOCK attack simulator (20-entry ransomware payload)
+DEMO.md                — click-by-click demo walkthrough (Free → toggle → Pro)
 ```
 
 ---
