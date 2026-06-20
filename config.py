@@ -1,4 +1,5 @@
-CANARY_PRO = False  # flip True (or POST /license/activate) to unlock Pro features
+CANARY_PRO = False        # flip True (or POST /license/activate) to unlock Pro features
+FREE_PASSWORD_LIMIT = 50  # Free tier cap; ignored when CANARY_PRO = True
 
 # Ports
 DASHBOARD_PORT = 5000

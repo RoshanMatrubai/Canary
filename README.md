@@ -14,6 +14,7 @@ NJX Hackathon 2026 · Arc 2 Wildcard
 | Append-only versioning | ✅ | ✅ |
 | Manual peer pairing (QR) | ✅ | ✅ |
 | Basic LAN sync | ✅ | ✅ |
+| Password storage | up to 50 | ∞ unlimited |
 | Ransomware canary detection | 🔒 | ✅ |
 | Auto-refuse + quarantine on bad sync | 🔒 | ✅ |
 | One-click restore from snapshot | 🔒 | ✅ |
