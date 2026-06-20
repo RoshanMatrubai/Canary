@@ -60,7 +60,8 @@ core/
   license.py       — Pro gate (require_pro / check_vault_limit / activate / deactivate) ✅
   test_license.py  — 10 license gate tests ✅
 guard/
-  detector.py      — 🐤 canary detection engine (Pro)
+  detector.py      — 🐤 canary detection engine: entropy, canary file, tripwire, mass change ✅
+  test_detector.py — 22 canary detection tests ✅
 sync/
   peer.py          — TCP server, X25519 handshake, Ed25519 manifests, mDNS, QR pairing ✅
 dashboard/

@@ -25,6 +25,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from zeroconf import ServiceBrowser, ServiceInfo, Zeroconf
 
 import config
+from guard.detector import SyncBlockedError, inspect_batch
 from core.crypto import (
     aes_gcm_decrypt,
     aes_gcm_encrypt,
@@ -163,12 +164,22 @@ def _verify_manifest(manifest: dict) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Detection hook — Phase 6 wires guard/detector.py here
+# Detection hook — wired to guard/detector.py (Pro-gated)
 # ---------------------------------------------------------------------------
 
-def _ingest_hook(entries: list[dict], node_id: str) -> None:
-    # Phase 6: replace this stub with canary detection logic
-    pass
+def _ingest_hook(entries: list[dict], node_id: str, vault_entry_count: int = 0) -> None:
+    if not config.CANARY_PRO:
+        return  # Free tier — coal mine has no canary
+    result = inspect_batch(
+        entries,
+        total_vault_entries=vault_entry_count,
+        quarantine_dir=config.QUARANTINE_DIR,
+        node_id=node_id,
+    )
+    if result.should_block:
+        raise SyncBlockedError(result)
+    if result.signals:
+        print(f"[canary] ⚠️  WARNING signals={result.signals} flagged={result.flagged}")
 
 
 # ---------------------------------------------------------------------------
@@ -223,12 +234,13 @@ class PeerNode:
     Use send_to_peer() or broadcast() to push vault entries to peers.
     """
 
-    def __init__(self, config_dir: str = ".canary"):
+    def __init__(self, config_dir: str = ".canary", vault_entry_count: int = 100):
         self.config_dir = config_dir
         self.ed_priv_raw, self.ed_pub_raw, self.secret_key = _load_or_create_identity(config_dir)
         # Short display ID derived from Ed25519 public key
         self.node_id = self.ed_pub_raw.hex()[:16]
         self.peers: dict[str, tuple[str, int]] = {}  # node_id → (host, port)
+        self.vault_entry_count = vault_entry_count  # used for mass-change % calculation
         self._zeroconf: Zeroconf | None = None
         self._server_sock: socket.socket | None = None
         self._running = False
@@ -265,9 +277,20 @@ class PeerNode:
                 return
             entries = manifest.get("entries", [])
             node_id = manifest.get("node_id", "unknown")
-            _ingest_hook(entries, node_id)
+            _ingest_hook(entries, node_id, vault_entry_count=self.vault_entry_count)
             _send_msg(conn, session_key, {"status": "ok", "count": len(entries)})
             print(f"[canary] ingested {len(entries)} entries from {node_id[:8]}…")
+        except SyncBlockedError as blocked:
+            print(f"[canary] 🚨 SYNC BLOCKED from {node_id[:8] if 'node_id' in dir() else '?'}… signals={blocked.result.signals}")
+            try:
+                _send_msg(conn, session_key, {
+                    "status": "blocked",
+                    "signals": blocked.result.signals,
+                    "flagged": blocked.result.flagged,
+                    "detail": blocked.result.detail,
+                })
+            except Exception:
+                pass
         except Exception as exc:
             print(f"[canary] error handling connection from {addr}: {exc}")
         finally:
