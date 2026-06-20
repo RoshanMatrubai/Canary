@@ -216,6 +216,8 @@ class _CanaryListener:
         if node_id and node_id != self._node.node_id:
             self._node.peers[node_id] = (host, port)
             print(f"[canary] discovered peer {node_id[:8]}… @ {host}:{port}")
+            if self._node.on_peer_discovered:
+                self._node.on_peer_discovered(node_id, host, port)
 
     def remove_service(self, zc: Zeroconf, type_: str, name: str) -> None:
         pass
@@ -234,13 +236,21 @@ class PeerNode:
     Use send_to_peer() or broadcast() to push vault entries to peers.
     """
 
-    def __init__(self, config_dir: str = ".canary", vault_entry_count: int = 100):
+    def __init__(
+        self,
+        config_dir: str = ".canary",
+        vault_entry_count: int = 100,
+        on_sync_event=None,
+        on_peer_discovered=None,
+    ):
         self.config_dir = config_dir
         self.ed_priv_raw, self.ed_pub_raw, self.secret_key = _load_or_create_identity(config_dir)
         # Short display ID derived from Ed25519 public key
         self.node_id = self.ed_pub_raw.hex()[:16]
         self.peers: dict[str, tuple[str, int]] = {}  # node_id → (host, port)
         self.vault_entry_count = vault_entry_count  # used for mass-change % calculation
+        self.on_sync_event = on_sync_event        # callback(event_dict) — wired by dashboard
+        self.on_peer_discovered = on_peer_discovered  # callback(node_id, host, port)
         self._zeroconf: Zeroconf | None = None
         self._server_sock: socket.socket | None = None
         self._running = False
@@ -280,6 +290,8 @@ class PeerNode:
             _ingest_hook(entries, node_id, vault_entry_count=self.vault_entry_count)
             _send_msg(conn, session_key, {"status": "ok", "count": len(entries)})
             print(f"[canary] ingested {len(entries)} entries from {node_id[:8]}…")
+            if self.on_sync_event:
+                self.on_sync_event({"type": "ok", "node_id": node_id, "count": len(entries)})
         except SyncBlockedError as blocked:
             print(f"[canary] 🚨 SYNC BLOCKED from {node_id[:8] if 'node_id' in dir() else '?'}… signals={blocked.result.signals}")
             try:
@@ -291,6 +303,15 @@ class PeerNode:
                 })
             except Exception:
                 pass
+            if self.on_sync_event:
+                self.on_sync_event({
+                    "type": "blocked",
+                    "node_id": node_id,
+                    "signals": blocked.result.signals,
+                    "flagged": blocked.result.flagged,
+                    "severity": blocked.result.severity,
+                    "detail": blocked.result.detail,
+                })
         except Exception as exc:
             print(f"[canary] error handling connection from {addr}: {exc}")
         finally:

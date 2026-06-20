@@ -30,7 +30,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Dashboard: http://localhost:5000
+Dashboard: http://localhost:5001
 
 ---
 
@@ -51,7 +51,7 @@ Dashboard: http://localhost:5000
 
 ```
 config.py          — all config incl. CANARY_PRO toggle
-main.py            — entry point
+main.py            — entry point (launches Flask dashboard)
 core/
   crypto.py        — Argon2id, AES-256-GCM, X25519, Ed25519, Shannon entropy ✅
   test_crypto.py   — 24 crypto primitive tests ✅
@@ -65,7 +65,9 @@ guard/
 sync/
   peer.py          — TCP server, X25519 handshake, Ed25519 manifests, mDNS, QR pairing ✅
 dashboard/
-  app.py           — Flask + SocketIO UI
+  app.py           — Flask + SocketIO API + SocketIO server ✅
+  templates/
+    index.html     — single-page dashboard UI ✅
 simulate_ransomware.py  — # MOCK attack simulator
 ```
 
