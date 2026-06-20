@@ -1,0 +1,8 @@
+flask
+flask-socketio
+cryptography
+argon2-cffi
+zeroconf
+qrcode[pil]
+pytest
+flake8
