@@ -18,6 +18,7 @@ env/
 # Canary runtime data — NEVER commit these
 vault_data/
 quarantine/
+.canary/
 *.key
 secret_key*
 *.kdbx

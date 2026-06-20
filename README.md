@@ -57,11 +57,12 @@ core/
   test_crypto.py   — 24 crypto primitive tests ✅
   vault.py         — append-only versioned store, free-tier 50-entry cap ✅
   test_vault.py    — 17 vault tests (create/unlock/add/list/restore/limit) ✅
-  license.py       — Pro gate stub (require_pro / check_vault_limit / CanaryLockedError) ✅
+  license.py       — Pro gate (require_pro / check_vault_limit / activate / deactivate) ✅
+  test_license.py  — 10 license gate tests ✅
 guard/
   detector.py      — 🐤 canary detection engine (Pro)
 sync/
-  peer.py          — P2P TCP + X25519 + mDNS discovery
+  peer.py          — TCP server, X25519 handshake, Ed25519 manifests, mDNS, QR pairing ✅
 dashboard/
   app.py           — Flask + SocketIO UI
 simulate_ransomware.py  — # MOCK attack simulator
